@@ -1,0 +1,15 @@
+# Python Virtual Environment
+venv/
+env/
+
+# Environment Variables & API Keys
+.env
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Data Files
+data/raw/*
+data/processed/*
+!data/samples/.gitkeep
