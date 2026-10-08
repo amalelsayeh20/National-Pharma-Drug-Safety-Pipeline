@@ -1,8 +1,8 @@
-\# RxVision Prototype — Troubleshooting \& Engineering Log
+# RxVision Prototype — Troubleshooting \& Engineering Log
 
 
 
-\## Overview
+## Overview
 
 
 
@@ -14,11 +14,11 @@ This document serves as an engineering post-mortem documenting the confirmed iss
 
 
 
-\---
+---
 
 
 
-\## Troubleshooting Summary
+## Troubleshooting Summary
 
 
 
@@ -40,15 +40,15 @@ This document serves as an engineering post-mortem documenting the confirmed iss
 
 
 
-\# Detailed Troubleshooting
+# Detailed Troubleshooting
 
 
 
-\## Issue #1 — RxNorm API Network Isolation
+## Issue #1 — RxNorm API Network Isolation
 
 
 
-\### Problem
+### Problem
 
 
 
@@ -90,7 +90,7 @@ rxnav.nlm.nih.gov
 
 
 
-\### Root Cause
+### Root Cause
 
 
 
@@ -98,7 +98,7 @@ The issue was caused by a local network/DNS connectivity problem preventing reli
 
 
 
-\### Solution
+### Solution
 
 
 
@@ -110,7 +110,7 @@ This restored connectivity to the RxNorm API.
 
 
 
-\### Why the Solution Works
+### Why the Solution Works
 
 
 
@@ -118,7 +118,7 @@ The network tunnel routes DNS and HTTP traffic through Cloudflare's infrastructu
 
 
 
-\### Prevention
+### Prevention
 
 
 
@@ -126,15 +126,15 @@ For production deployments, API connectivity should be designed with:
 
 
 
-\* Reliable DNS resolution
+* Reliable DNS resolution
 
-\* Network redundancy
+* Network redundancy
 
-\* Retry mechanisms
+* Retry mechanisms
 
-\* Request timeouts
+* Request timeouts
 
-\* Monitoring for external API availability
+* Monitoring for external API availability
 
 
 
@@ -146,11 +146,11 @@ For example, retry logic can be implemented using `urllib3.util.Retry`.
 
 
 
-\# Issue #2 — OpenFDA API TLS Handshake Hang
+# Issue #2 — OpenFDA API TLS Handshake Hang
 
 
 
-\### Problem
+### Problem
 
 
 
@@ -202,7 +202,7 @@ KeyboardInterrupt
 
 
 
-\### Root Cause
+### Root Cause
 
 
 
@@ -226,7 +226,7 @@ which can be treated differently by some API gateways or network security system
 
 
 
-\### Solution
+### Solution
 
 
 
@@ -278,7 +278,7 @@ response = requests.get(
 
 
 
-\### Why the Solution Works
+### Why the Solution Works
 
 
 
@@ -294,15 +294,15 @@ External API calls in data pipelines should always include:
 
 
 
-\* A defined `User-Agent`
+* A defined `User-Agent`
 
-\* Request timeouts
+* Request timeouts
 
-\* Exception handling
+* Exception handling
 
-\* Retry logic where appropriate
+* Retry logic where appropriate
 
-\* Centralized API configuration
+* Centralized API configuration
 
 
 
@@ -326,11 +326,11 @@ without a timeout.
 
 
 
-\# Issue #3 — OpenFDA 404 on Ingredient-Level RxCUI
+# Issue #3 — OpenFDA 404 on Ingredient-Level RxCUI
 
 
 
-\### Problem
+### Problem
 
 
 
@@ -362,11 +362,11 @@ even though `5640` is a valid RxNorm RxCUI.
 
 
 
-\### Root Cause
+### Root Cause
 
 
 
-\*\*RxNorm and OpenFDA use different data models and identifiers.\*\*
+*\*RxNorm and OpenFDA use different data models and identifiers.\*\*
 
 
 
@@ -378,7 +378,7 @@ Therefore, a valid RxNorm identifier does not guarantee that the same identifier
 
 
 
-\### Solution
+### Solution
 
 
 
@@ -386,7 +386,7 @@ A multi-tier search strategy was implemented.
 
 
 
-\#### Primary Search
+#### Primary Search
 
 
 
@@ -402,7 +402,7 @@ fda\_record = search\_fda\_by\_ingredient(ingredient\_name)
 
 
 
-\#### Secondary Fallback
+#### Secondary Fallback
 
 
 
@@ -424,7 +424,7 @@ HTTP `404` responses are also treated as an empty result rather than an unexpect
 
 
 
-\### Why the Solution Works
+### Why the Solution Works
 
 
 
@@ -436,7 +436,7 @@ This makes the pipeline more resilient to differences between external healthcar
 
 
 
-\### Prevention
+### Prevention
 
 
 
@@ -452,13 +452,13 @@ Instead, use:
 
 
 
-\* Multiple lookup attributes
+* Multiple lookup attributes
 
-\* Fallback strategies
+* Fallback strategies
 
-\* Explicit handling of empty results
+* Explicit handling of empty results
 
-\* Defensive API response parsing
+* Defensive API response parsing
 
 
 
@@ -466,15 +466,15 @@ Instead, use:
 
 
 
-\# Issue #4 — Unstructured Terminal Output
+# Issue #4 — Unstructured Terminal Output
 
 
 
-\## `print()` vs. `logging`
+## `print()` vs. `logging`
 
 
 
-\### Problem
+### Problem
 
 
 
@@ -482,31 +482,7 @@ The original prototype relied heavily on:
 
 
 
-```python
-
-print()
-
-```
-
-
-
-for execution tracking.
-
-
-
-For example:
-
-
-
-```python
-
-print("Searching OpenFDA by ingredient...")
-
-```
-
-
-
-\### Root Cause
+### Root Cause
 
 
 
@@ -514,13 +490,13 @@ print("Searching OpenFDA by ingredient...")
 
 
 
-\* Timestamp
+* Timestamp
 
-\* Severity level
+* Severity level
 
-\* Logger name
+* Logger name
 
-\* Execution context
+* Execution context
 
 
 
@@ -528,7 +504,7 @@ This becomes limiting when the application evolves into an automated data pipeli
 
 
 
-\### Solution
+### Solution
 
 
 
@@ -558,83 +534,7 @@ logger = logging.getLogger(\_\_name\_\_)
 
 
 
-Operational messages were then changed from:
-
-
-
-```python
-
-print("Searching OpenFDA by ingredient...")
-
-```
-
-
-
-to:
-
-
-
-```python
-
-logger.info("Searching OpenFDA by ingredient...")
-
-```
-
-
-
-Warnings use:
-
-
-
-```python
-
-logger.warning("No RxCUI found for %s", ingredient\_name)
-
-```
-
-
-
-and errors use:
-
-
-
-```python
-
-logger.error("API request failed: %s", e)
-
-```
-
-
-
-\### Why the Solution Works
-
-
-
-Logging provides structured execution information, including timestamps and severity levels.
-
-
-
-This makes application behavior easier to:
-
-
-
-\* Debug
-
-\* Monitor
-
-\* Search
-
-\* Aggregate
-
-\* Analyze
-
-
-
-It also integrates naturally with future orchestration tools such as \*\*Apache Airflow\*\* and \*\*Prefect\*\*, where pipeline execution logs need to be monitored systematically.
-
-
-
-\### Prevention
+### Prevention
 
 
 
@@ -666,53 +566,7 @@ Use appropriate levels:
 
 
 
-\# Engineering Lessons Learned
-
-
-
-The troubleshooting process highlighted several important Data Engineering principles:
-
-
-
-1\. \*\*External APIs are unreliable dependencies.\*\*
-
-&#x20;  Network failures, timeouts, empty responses, and service changes must be expected.
-
-
-
-2\. \*\*Never assume identical schemas between different healthcare systems.\*\*
-
-&#x20;  RxNorm and OpenFDA may represent the same drug using different identifiers and structures.
-
-
-
-3\. \*\*Use defensive programming when consuming external data.\*\*
-
-&#x20;  API responses should be validated before accessing nested fields.
-
-
-
-4\. \*\*Every external HTTP request should have a timeout.\*\*
-
-
-
-5\. \*\*Fallback strategies improve pipeline resilience.\*\*
-
-
-
-6\. \*\*Logging is preferable to `print()` for automated pipelines.\*\*
-
-
-
-7\. \*\*Prototype decisions should anticipate future orchestration and production deployment.\*\*
-
-
-
-\---
-
-
-
-\# Current Prototype Scope
+# Current Prototype Scope
 
 
 
