@@ -608,7 +608,7 @@ It is currently an \*\*API integration prototype\*\*, not a complete clinical or
 
 The retrieved information should not be treated as a medical diagnosis or as a replacement for professional clinical judgment.
 
-## 🛠 Extraction & Clinical Safety Data Issues (ETL Pipeline)
+# 🛠 Extraction & Clinical Safety Data Issues (ETL Pipeline)
 
 | **1. Incomplete / Missing Clinical Safety Data from openFDA API** | The openFDA response structures varying safety attributes across different keys (`warnings`, `contraindications`, `boxed_warning`, `adverse_reactions`), often returning empty fields for specific queried drugs. | Integrated a robust **Fallback Strategy**: <br>• Created a unified `combined_safety_text` field aggregating all safety sections. <br>• Implemented fallback logic where `side_effects_output` dynamically defaults to `warnings` if `adverse_reactions` is empty, ensuring non-null safety output. |
 
