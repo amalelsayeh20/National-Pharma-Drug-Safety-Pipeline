@@ -608,5 +608,11 @@ It is currently an \*\*API integration prototype\*\*, not a complete clinical or
 
 The retrieved information should not be treated as a medical diagnosis or as a replacement for professional clinical judgment.
 
+### 🛠 Extraction & Clinical Safety Data Issues (ETL Pipeline)
+
+| **1. Incomplete / Missing Clinical Safety Data from openFDA API** | The openFDA response structures varying safety attributes across different keys (`warnings`, `contraindications`, `boxed_warning`, `adverse_reactions`), often returning empty fields for specific queried drugs. | Integrated a robust **Fallback Strategy**: <br>• Created a unified `combined_safety_text` field aggregating all safety sections. <br>• Implemented fallback logic where `side_effects_output` dynamically defaults to `warnings` if `adverse_reactions` is empty, ensuring non-null safety output. |
+
+
+| **2. Unformatted & Excessive Text Output in Terminal** | Raw clinical warnings and side-effects strings retrieved from openFDA can exceed 2,500+ characters, cluttering terminal displays and degrading UI readability. | Applied string slicing and length control to strictly cap output text at **700 characters** (appending `...`), preserving critical clinical context while keeping the CLI output structured and concise. |
 
 
